@@ -5,16 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OPTIONS PLAN</title>
     <style>
-        /* CSS para ocultar las flechas de incremento/decremento en los inputs numéricos */
-        input[type="number"]::-webkit-outer-spin-button,
-        input[type="number"]::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        input[type="number"] {
-            -moz-appearance: textfield; /* Para Firefox */
-        }
-
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             background-color: #131722; 
@@ -141,21 +131,19 @@
     <div class="container">
         <h2>OPTIONS PLAN</h2>
         
-        <!-- step="any" permite decimales sin error, y el CSS oculta las flechas -->
         <label for="entryPrice">Precio de entrada</label>
-        <input type="number" id="entryPrice" placeholder="Ej. 0.0" step="any">
+        <input type="text" id="entryPrice" placeholder="Ej. 0.0" inputmode="decimal">
 
         <label for="targetPrice">Precio objetivo</label>
-        <input type="number" id="targetPrice" placeholder="Ej. 0.0" step="any">
+        <input type="text" id="targetPrice" placeholder="Ej. 0.0" inputmode="decimal">
 
         <label for="premium">Costo del contrato</label>
-        <input type="number" id="premium" placeholder="Ej. 0.0" step="any">
+        <input type="text" id="premium" placeholder="Ej. 0.0" inputmode="decimal">
 
         <button onclick="calculatePlan()">GENERATE</button>
 
         <div id="results" class="result-box">
             <div class="results-grid">
-                <!-- COLUMNA 1 (Izquierda) -->
                 <div class="column column-left">
                     <div class="result-item">
                         <span>Strike recomendado</span>
@@ -167,7 +155,6 @@
                     </div>
                 </div>
                 
-                <!-- COLUMNA 2 (Derecha) -->
                 <div class="column column-right">
                     <div class="result-item">
                         <span>Break even</span>
@@ -180,7 +167,6 @@
                 </div>
             </div>
             
-            <!-- ELEMENTO CENTRAL -->
             <div class="center-row">
                 <div class="result-item" style="margin-bottom: 0;">
                     <span>Stop loss</span>
@@ -192,39 +178,37 @@
 
     <script>
         function calculatePlan() {
-            const entryPrice = parseFloat(document.getElementById('entryPrice').value);
-            const premium = parseFloat(document.getElementById('premium').value);
+            // Reemplazar comas por puntos por si se teclea en teclados latinoamericanos
+            const entryValue = document.getElementById('entryPrice').value.replace(',', '.');
+            const premiumValue = document.getElementById('premium').value.replace(',', '.');
+
+            const entryPrice = parseFloat(entryValue);
+            const premium = parseFloat(premiumValue);
 
             if (isNaN(entryPrice) || isNaN(premium)) {
                 alert('Por favor, llena los campos de Precio de entrada y Costo del contrato.');
                 return;
             }
 
-            // Cálculo de Strike sugerido (ATM / ITM sólido)
             const strikeATM = Math.floor(entryPrice);
             const strikeITM = strikeATM > 5 ? strikeATM - Math.floor(strikeATM % 5 === 0 ? 5 : strikeATM % 5) : strikeATM - 1; 
             document.getElementById('resStrike').innerText = `Call ${strikeATM} / ${strikeITM}`;
 
-            // Break Even (+15%)
             const breakEven = premium * 1.15;
             document.getElementById('resBE').innerText = `$${breakEven.toFixed(2)}`;
 
-            // TP1 (+30% -> Ratio 2:1)
             const tp1 = premium * 1.30;
             const totalGain1 = (tp1 - premium) * 100;
             document.getElementById('resTP1').innerText = `$${tp1.toFixed(2)} (+$${totalGain1.toFixed(0)} USD)`;
 
-            // TP2 Exponential (+45% -> Ratio 3:1)
             const tp2 = premium * 1.45;
             const totalGain2 = (tp2 - premium) * 100;
             document.getElementById('resTP2').innerText = `$${tp2.toFixed(2)} (+$${totalGain2.toFixed(0)} USD)`;
 
-            // Stop Loss Estricto (-15%)
             const stopLoss = premium * 0.85;
             const totalRisk = (premium - stopLoss) * 100;
             document.getElementById('resSL').innerText = `$${stopLoss.toFixed(2)} (-$${totalRisk.toFixed(0)} USD)`;
 
-            // Mostrar el contenedor de resultados
             document.getElementById('results').style.display = 'block';
         }
     </script>
