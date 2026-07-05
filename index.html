@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPTIONS PLAN</title>
+    <style>
+        /* CSS para ocultar las flechas de incremento/decremento en los inputs numéricos */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield; /* Para Firefox */
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #131722; 
+            color: #d1d4dc; 
+            margin: 0; 
+            padding: 20px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+        }
+        .container { 
+            background-color: #1e222d; 
+            padding: 30px; 
+            border-radius: 12px; 
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5); 
+            width: 100%; 
+            max-width: 550px; 
+        }
+        h2 { 
+            color: #00FFFF; 
+            text-align: center; 
+            margin-top: 0;
+            margin-bottom: 25px; 
+            border-bottom: 1px solid #2a2e39; 
+            padding-bottom: 15px; 
+        }
+        label { 
+            display: block; 
+            margin-bottom: 8px; 
+            font-size: 14px;
+            color: #b2b5be; 
+        }
+        input { 
+            width: 100%; 
+            padding: 12px; 
+            margin-bottom: 20px; 
+            border: 1px solid #2a2e39; 
+            background-color: #131722; 
+            color: #fff; 
+            border-radius: 6px; 
+            box-sizing: border-box; 
+            font-size: 16px; 
+        }
+        input:focus { 
+            outline: none; 
+            border-color: #FFF200; 
+            box-shadow: 0 0 8px rgba(255, 242, 0, 0.4); 
+        }
+        button { 
+            width: 100%; 
+            padding: 14px; 
+            background-color: #FFF200; 
+            color: #131722; 
+            border: none; 
+            border-radius: 6px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: background-color 0.3s, transform 0.1s; 
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        button:hover { 
+            background-color: #e6da00; 
+            box-shadow: 0 0 15px rgba(255, 242, 0, 0.5); 
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        .result-box { 
+            margin-top: 25px; 
+            padding: 20px; 
+            border-radius: 8px; 
+            background-color: #2a2e39; 
+            display: none; 
+            border-left: 4px solid #00FFFF;
+        }
+        .results-grid {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+        }
+        .column {
+            display: table-cell;
+            width: 50%;
+            vertical-align: top;
+        }
+        .column-left {
+            padding-right: 15px;
+            border-right: 1px solid #363c4e;
+        }
+        .column-right {
+            padding-left: 15px;
+        }
+        .result-item { 
+            margin-bottom: 18px; 
+        }
+        .result-item span { 
+            display: block; 
+            font-size: 12px; 
+            color: #b2b5be; 
+            margin-bottom: 5px; 
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .result-item strong { 
+            font-size: 18px; 
+            color: #fff; 
+        }
+        .center-row {
+            text-align: center;
+            margin-top: 15px;
+            padding-top: 20px;
+            border-top: 1px solid #363c4e;
+        }
+        .highlight-cyan { color: #00FFFF !important; }
+        .highlight-red { color: #ff5252 !important; }
+        .highlight-green { color: #00E676 !important; }
+        .highlight-gold { color: #FFD700 !important; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>OPTIONS PLAN</h2>
+        
+        <!-- step="any" permite decimales sin error, y el CSS oculta las flechas -->
+        <label for="entryPrice">Precio de entrada</label>
+        <input type="number" id="entryPrice" placeholder="Ej. 0.0" step="any">
+
+        <label for="targetPrice">Precio objetivo</label>
+        <input type="number" id="targetPrice" placeholder="Ej. 0.0" step="any">
+
+        <label for="premium">Costo del contrato</label>
+        <input type="number" id="premium" placeholder="Ej. 0.0" step="any">
+
+        <button onclick="calculatePlan()">GENERATE</button>
+
+        <div id="results" class="result-box">
+            <div class="results-grid">
+                <!-- COLUMNA 1 (Izquierda) -->
+                <div class="column column-left">
+                    <div class="result-item">
+                        <span>Strike recomendado</span>
+                        <strong id="resStrike" class="highlight-cyan"></strong>
+                    </div>
+                    <div class="result-item" style="margin-bottom: 0;">
+                        <span>TP1</span>
+                        <strong id="resTP1" class="highlight-green"></strong>
+                    </div>
+                </div>
+                
+                <!-- COLUMNA 2 (Derecha) -->
+                <div class="column column-right">
+                    <div class="result-item">
+                        <span>Break even</span>
+                        <strong id="resBE" class="highlight-green"></strong>
+                    </div>
+                    <div class="result-item" style="margin-bottom: 0;">
+                        <span>TP2 exponential</span>
+                        <strong id="resTP2" class="highlight-gold"></strong>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ELEMENTO CENTRAL -->
+            <div class="center-row">
+                <div class="result-item" style="margin-bottom: 0;">
+                    <span>Stop loss</span>
+                    <strong id="resSL" class="highlight-red"></strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculatePlan() {
+            const entryPrice = parseFloat(document.getElementById('entryPrice').value);
+            const premium = parseFloat(document.getElementById('premium').value);
+
+            if (isNaN(entryPrice) || isNaN(premium)) {
+                alert('Por favor, llena los campos de Precio de entrada y Costo del contrato.');
+                return;
+            }
+
+            // Cálculo de Strike sugerido (ATM / ITM sólido)
+            const strikeATM = Math.floor(entryPrice);
+            const strikeITM = strikeATM > 5 ? strikeATM - Math.floor(strikeATM % 5 === 0 ? 5 : strikeATM % 5) : strikeATM - 1; 
+            document.getElementById('resStrike').innerText = `Call ${strikeATM} / ${strikeITM}`;
+
+            // Break Even (+15%)
+            const breakEven = premium * 1.15;
+            document.getElementById('resBE').innerText = `$${breakEven.toFixed(2)}`;
+
+            // TP1 (+30% -> Ratio 2:1)
+            const tp1 = premium * 1.30;
+            const totalGain1 = (tp1 - premium) * 100;
+            document.getElementById('resTP1').innerText = `$${tp1.toFixed(2)} (+$${totalGain1.toFixed(0)} USD)`;
+
+            // TP2 Exponential (+45% -> Ratio 3:1)
+            const tp2 = premium * 1.45;
+            const totalGain2 = (tp2 - premium) * 100;
+            document.getElementById('resTP2').innerText = `$${tp2.toFixed(2)} (+$${totalGain2.toFixed(0)} USD)`;
+
+            // Stop Loss Estricto (-15%)
+            const stopLoss = premium * 0.85;
+            const totalRisk = (premium - stopLoss) * 100;
+            document.getElementById('resSL').innerText = `$${stopLoss.toFixed(2)} (-$${totalRisk.toFixed(0)} USD)`;
+
+            // Mostrar el contenedor de resultados
+            document.getElementById('results').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
